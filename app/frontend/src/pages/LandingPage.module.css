@@ -1,0 +1,51 @@
+.background {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(120deg, #111827 0%, #20232b 50%, #23272f 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero {
+  max-width: 600px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-shadow: 0 2px 16px #0004;
+}
+
+.subtitle {
+  font-size: 1.4rem;
+  color: #a3aed6;
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
+}
+
+.glow {
+  position: absolute;
+  width: 50vw;
+  height: 50vw;
+  max-width: 900px;
+  max-height: 900px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 40%, #6366f188 0%, #18181b00 70%);
+  filter: blur(48px);
+  opacity: 0.3;
+  z-index: 0;
+}
