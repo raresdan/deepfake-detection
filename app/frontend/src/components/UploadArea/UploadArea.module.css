@@ -1,0 +1,54 @@
+.uploadBox {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+  margin-bottom: 1.5rem; /* Add this line */
+}
+
+.uploadLabel {
+  width: 340px;
+  min-height: 180px;
+  border: 2px dashed #374151;
+  border-radius: 1rem;
+  background: #181c24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  position: relative;
+}
+
+.uploadLabel:hover,
+.uploadLabel:focus-within {
+  border-color: #2563eb;
+  background: #23272f;
+}
+
+.uploadInput {
+  display: none;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #bfc7d5;
+  font-size: 1.08rem;
+  font-weight: 500;
+  gap: 0.5rem;
+}
+
+.imagePreview {
+  max-width: 340px;
+  max-height: 220px;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px #0004;
+  object-fit: contain;
+  background: #23272f;
+}

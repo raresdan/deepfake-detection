@@ -1,0 +1,43 @@
+.resultBox {
+  background: rgba(35, 39, 47, 0.98);
+  padding: 2rem 1.2rem 1.5rem 1.2rem;
+  margin: 2rem auto 0 auto;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px #0006;
+  width: 100%;
+  max-width: 420px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;   
+  overflow-x: hidden;
+}
+
+.resultVerdict {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.confidences {
+  margin-bottom: 1.4rem;
+  color: #c7d2fe;
+  width: 100%;
+  font-size: 1.05rem;
+}
+.confidences ul {
+  padding-left: 1.2em;
+  margin: 0.5em 0 0 0;
+}
+.confidences li {
+  word-break: break-word;    /* <-- add this for safety */
+  overflow-wrap: break-word;
+}
+
+.actionBtn {
+  margin-top: 0.8rem;
+  min-width: 130px;
+}

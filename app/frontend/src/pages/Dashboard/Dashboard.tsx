@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-
-import styles from "./Dashboard.module.css";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
 import Button from "../../components/Button/Button";
-
+import TopBar from "../../components/TopBar/TopBar";
+import UploadArea from "../../components/UploadArea/UploadArea";
+import ModelSelector from "../../components/ModelSelector/ModelSelector";
+import ResultBox from "../../components/ResultBox/ResultBox";
+import styles from "./Dashboard.module.css";
 
 interface DetectionResult {
   verdict: "real" | "fake";
@@ -13,9 +15,9 @@ interface DetectionResult {
 }
 
 const availableModels = [
-  { value: "xception", label: "XceptionNet" },
-  { value: "resnet", label: "ResNet" },
-  { value: "efficientnet", label: "EfficientNet" }
+  { value: "xception", label: "XceptionNet", desc: "Slower but more accurate predictions" },
+  { value: "resnet", label: "ResNet", desc: "Fast, good for real-time" },
+  { value: "efficientnet", label: "EfficientNet", desc: "Balanced speed and accuracy" }
 ];
 
 const Dashboard: React.FC = () => {
@@ -25,21 +27,69 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [model, setModel] = useState<string>("xception"); // Default to first model
+  const [model, setModel] = useState<string>("xception");
+  const [dragActive, setDragActive] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [faceValid, setFaceValid] = useState<boolean | null>(null);
   const navigate = useNavigate();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        navigate("/login", { replace: true });
+      } else {
+        setAuthLoading(false);
+      }
+    };
+    checkAuth();
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) navigate("/login", { replace: true });
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setImage(file ?? null);
     setResult(null);
     setSaveSuccess(false);
     setError(null);
-    if (file) setImagePreview(URL.createObjectURL(file));
-    else setImagePreview(null);
+    setFaceValid(null);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+      // Validate face
+      try {
+        const formData = new FormData();
+        formData.append("image", file);
+        const { data } = await axios.post(
+          "/api/validate-face",
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setFaceValid(data.valid);
+        if (!data.valid) setError("No face detected in the uploaded image.");
+      } catch {
+        setFaceValid(false);
+        setError("Failed to validate face in the image.");
+      }
+    } else {
+      setImagePreview(null);
+    }
+  };
+
+  const handleClear = () => {
+    setImage(null);
+    setImagePreview(null);
+    setResult(null);
+    setSaveSuccess(false);
+    setError(null);
   };
 
   const handleDetect = async () => {
-    if (!image) return;
+    if (!image || faceValid === false) return;
     setLoading(true);
     setError(null);
     setResult(null);
@@ -53,7 +103,7 @@ const Dashboard: React.FC = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/detect`,
+        '/api/detect',
         formData,
         {
           headers: {
@@ -105,83 +155,65 @@ const Dashboard: React.FC = () => {
     navigate("/login");
   };
 
+  if (authLoading) {
+    return (
+      <div className={styles.fullscreenCenter}>
+        Checking authentication...
+      </div>
+    );
+  }
+
   return (
     <div className={styles.dashboardBg}>
-      <nav className={styles.topBar}>
-        <Button
-          onClick={() => navigate("/history")}
-          variant="secondary"
-        >
-          History
-        </Button>
-        <Button
-          onClick={handleLogout}
-          variant="secondary"
-        >
-          Logout
-        </Button>
-      </nav>
+      <TopBar onHistory={() => navigate("/history")} onLogout={handleLogout} />
       <main className={styles.mainArea}>
         <h1 className={styles.dashboardTitle}>Deepfake Detection</h1>
-        <div className={styles.uploadBox}>
-          {imagePreview ? (
-            <img src={imagePreview} alt="preview" className={styles.imagePreview} />
-          ) : (
-            <label className={styles.uploadLabel}>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className={styles.uploadInput}
-                disabled={loading}
-              />
-              <span>Click to upload a photo</span>
-            </label>
-          )}
+        <div className={styles.dashboardSubtitle}>
+          Select a detection model and upload an image to get started!
         </div>
-        <select
-          className={styles.modelSelector}
-          value={model}
-          onChange={e => setModel(e.target.value)}
+        <ModelSelector
+          model={model}
+          setModel={setModel}
           disabled={loading}
-        >
-          {availableModels.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
-          ))}
-        </select>
+          models={availableModels}
+        />
+        <UploadArea
+          imagePreview={imagePreview}
+          onImageChange={handleImageChange}
+          onClear={handleClear}
+          loading={loading}
+          dragActive={dragActive}
+          setDragActive={setDragActive}
+        />
+        {faceValid === false && (
+          <div className={styles.errorMsg}>
+            No face detected in the uploaded image. Please upload a clear face photo.
+          </div>
+        )}
         <Button
           className={styles.actionBtn}
           onClick={handleDetect}
-          disabled={!image || loading}
+          disabled={!image || loading || faceValid !== true}
         >
           {loading ? "Checking..." : "Check Deepfake"}
         </Button>
-        {result && (
-          <div className={styles.resultBox}>
-            <div className={styles.resultVerdict}>
-              {result.verdict === "real" ? "🟢 Real" : "🔴 Fake"}
-            </div>
-            <div className={styles.confidences}>
-              <div>Model Confidence:</div>
-              <ul>
-                {Object.entries(result.confidences).map(([model, conf]) => (
-                  <li key={model}>
-                    <b>{model}</b>: {(conf * 100).toFixed(2)}%
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <Button
-              className={styles.actionBtn}
-              onClick={handleSave}
-              disabled={saveSuccess || loading}
-              variant="secondary"
-            >
-              {saveSuccess ? "Saved!" : "Save Result"}
-            </Button>
+        {error && faceValid !== false && (
+          <div className={styles.errorMsg}>{error}</div>
+        )}
+        {loading && (
+          <div className={styles.loadingOverlay}>
+            Loading...
           </div>
         )}
-        {error && <div className={styles.errorMsg}>{error}</div>}
+        {result && !loading && (
+          <ResultBox
+            result={result}
+            onSave={handleSave}
+            saveSuccess={saveSuccess}
+            loading={loading}
+
+          />
+        )}
       </main>
     </div>
   );

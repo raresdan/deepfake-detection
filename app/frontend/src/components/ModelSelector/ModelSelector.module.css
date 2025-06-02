@@ -1,0 +1,74 @@
+.selectorWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  margin: 1.2rem 0;
+}
+
+.selectorButton {
+  width: 100%;
+  background: #181c24;
+  border: 2px solid #23272f;
+  border-radius: 0.7rem;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  color: #fff;
+  font-size: 1.08rem;
+  outline: none;
+  text-align: left; /* Ensure button content is left-aligned */
+}
+.selectorButton:focus,
+.selectorButton:hover {
+  border-color: #2563eb;
+}
+
+.arrow {
+  margin-left: 1rem;
+  font-size: 1.1rem;
+  color: #bfc7d5;
+}
+
+.dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  background: #23272f;
+  border-radius: 0.7rem;
+  box-shadow: 0 4px 16px #0005;
+  z-index: 100;
+  padding: 0.3rem 0;
+  margin: 0;
+  list-style: none;
+  text-align: left; /* Ensure dropdown content is left-aligned */
+}
+
+.dropdownItem {
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #fff;
+  text-align: left; /* Ensure dropdown items are left-aligned */
+}
+.dropdownItem:hover,
+.dropdownItem[aria-selected="true"] {
+  background: #2563eb22;
+}
+
+.modelLabel {
+  font-weight: 600;
+  color: #fff;
+  text-align: left; /* Ensure text inside is left-aligned */
+}
+
+.modelDesc {
+  font-size: 0.97rem;
+  color: #7ea2ff;
+  margin-top: 0.1rem;
+  text-align: left; /* Ensure text inside is left-aligned */
+  display: block;
+}
