@@ -3,3 +3,5 @@ venv
 app/frontend/.env
 app/frontend/node_modules
 app/backend/.env
+datasets
+./datasets
