@@ -8,17 +8,24 @@ from huggingface_hub import hf_hub_download
 from ultralytics import YOLO
 from PIL import Image
 import io
+from supabase import create_client, Client
+from config import Config 
 
 app = Flask(__name__)
 CORS(app)
 
-
-HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
-HUGGINGFACE_FACE_MODEL = "arnabdhar/YOLOv8-Face-Detection"
+# Use variables from Config
+HUGGINGFACE_API_TOKEN = Config.HUGGINGFACE_API_TOKEN
+HUGGINGFACE_FACE_MODEL = Config.HUGGINGFACE_FACE_MODEL
 
 # Download and load the model once at startup
-MODEL_PATH = hf_hub_download(repo_id="arnabdhar/YOLOv8-Face-Detection", filename="model.pt")
+MODEL_PATH = hf_hub_download(repo_id=HUGGINGFACE_FACE_MODEL, filename="model.pt")
 yolo_model = YOLO(MODEL_PATH)
+
+SUPABASE_URL = Config.SUPABASE_URL
+SUPABASE_KEY = Config.SUPABASE_KEY
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 
 def decode_image(file_bytes):
@@ -106,6 +113,19 @@ def save_to_gallery():
         return jsonify({"error": "Missing data"}), 400
     gallery.append(data)
     return jsonify({"success": True})
+
+@app.route('/api/user/name', methods=['GET'])
+def get_user_name():
+    # You might get the user id from a JWT or session in production
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
+    response = supabase.table("users").select("name").eq("id", user_id).single().execute()
+    if response.data and "name" in response.data:
+        return jsonify({"name": response.data["name"]})
+    else:
+        return jsonify({"error": "User not found"}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

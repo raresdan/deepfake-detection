@@ -1,17 +1,19 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./TopBar.module.css";
 import Button from "../../components/Button/Button";
-import { History, UserRound } from "lucide-react"; // Changed icon
+import { History, UserRound, LayoutDashboard } from "lucide-react"; // Import dashboard icon
 
 const TopBar = ({
-  onHistory,
   onLogout,
+  userName,
 }: {
-  onHistory: () => void;
   onLogout: () => void;
+  userName: string;
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Close menu on outside click
   useEffect(() => {
@@ -27,7 +29,19 @@ const TopBar = ({
   return (
     <nav className={styles.topBar}>
       <div className={styles.left}>
-        <Button onClick={onHistory} variant="secondary" className={styles.historyBtn}>
+        <Button
+          onClick={() => navigate("/dashboard")}
+          variant="secondary"
+          className={styles.historyBtn}
+        >
+          <LayoutDashboard size={20} color="#fff" strokeWidth={2} />
+          <span>Dashboard</span>
+        </Button>
+        <Button
+          onClick={() => navigate("/history")}
+          variant="secondary"
+          className={styles.historyBtn}
+        >
           <History size={20} color="#fff" strokeWidth={2} />
           <span>History</span>
         </Button>
@@ -39,11 +53,16 @@ const TopBar = ({
           tabIndex={0}
           aria-label="Open profile menu"
         >
-          <UserRound size={28} color="#fff" strokeWidth={2} /> {/* Changed icon */}
+          <UserRound size={28} color="#fff" strokeWidth={2} />
         </div>
         {showMenu && (
           <div className={styles.profileMenu} ref={menuRef}>
-            <Button onClick={onLogout} variant="secondary" className={styles.logoutBtn}>
+            <div className={styles.greeting}>Hello, {userName}</div>
+            <Button
+              onClick={onLogout}
+              variant="secondary"
+              className={styles.logoutBtn}
+            >
               Logout
             </Button>
           </div>

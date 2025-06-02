@@ -3,7 +3,7 @@ import { supabase } from "../../services/supabaseClient";
 import styles from "./AuthForm.module.css";
 import Button from "../../components/Button/Button";
 import { FcGoogle } from "react-icons/fc";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // <-- add useNavigate
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +11,7 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate(); // <-- add this
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,10 @@ const Register: React.FC = () => {
     });
 
     if (error) setError(error.message);
-    else setSuccess(true);
+    else {
+      setSuccess(true);
+      navigate("/dashboard"); // <-- redirect on success
+    }
 
     setLoading(false);
   };

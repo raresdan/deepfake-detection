@@ -43,7 +43,7 @@ const Dashboard: React.FC = () => {
       }
     };
     checkAuth();
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) navigate("/login", { replace: true });
     });
     return () => {
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={styles.dashboardBg}>
-      <TopBar onHistory={() => navigate("/history")} onLogout={handleLogout} />
+      <TopBar onLogout={handleLogout} userName={"Rares"} />
       <main className={styles.mainArea}>
         <h1 className={styles.dashboardTitle}>Deepfake Detection</h1>
         <div className={styles.dashboardSubtitle}>
