@@ -1,0 +1,145 @@
+.dashboardBg {
+  min-height: 100vh;
+  min-width: 100vw;
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(120deg, #111827 0%, #20232b 50%, #23272f 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.topBar {
+  width: 100vw;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1.2rem 2.5rem 0.6rem 2.5rem;
+  gap: 0.7rem;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.mainArea {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+.dashboardTitle {
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.uploadBox {
+  margin-bottom: 1.8rem;
+  width: 330px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.uploadLabel {
+  cursor: pointer;
+  color: #a3aed6;
+  padding: 2.4rem 2.8rem;
+  border-radius: 1.5rem;
+  border: 2px dashed #6366f1;
+  background: rgba(35, 39, 47, 0.85);
+  font-size: 1.17rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  transition: background 0.15s, border 0.15s;
+  width: 100%;
+  max-width: 330px;
+}
+
+.uploadLabel:hover {
+  background: #23272f;
+  border: 2px solid #6366f1;
+}
+
+.uploadInput {
+  display: none;
+}
+
+.imagePreview {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px #0007;
+  margin-bottom: 0.9rem;
+}
+
+.actionBtn {
+  width: 100%;
+  max-width: 330px;
+  margin-bottom: 1.2rem;
+  box-sizing: border-box;
+}
+
+.resultBox {
+  margin: 1.2rem 0 0.5rem 0;
+  background: #23272f;
+  border-radius: 1.1rem;
+  box-shadow: 0 4px 24px #2563eb11;
+  padding: 2.1rem 2rem 1.3rem 2rem;
+  width: 350px;
+  max-width: 92vw;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.resultVerdict {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.1rem;
+}
+
+.confidences {
+  margin-bottom: 1.4rem;
+}
+
+.errorMsg {
+  color: #ff8383;
+  margin-top: 1.1rem;
+  font-size: 1.08rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .dashboardTitle { font-size: 1.3rem; }
+  .mainArea { padding-top: 1rem; }
+  .resultBox, .uploadBox { width: 99vw; padding: 0.4rem; }
+  .topBar { padding: 0.7rem 0.3rem 0.3rem 0.3rem; }
+  .actionBtn { max-width: 99vw; }
+}
+
+.modelSelector {
+  width: 100%;
+  max-width: 330px;
+  margin-bottom: 1.2rem;
+  font-size: 1.12rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  background: #23272f;
+  color: #fff;
+  border: 1.5px solid #6366f1;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.modelSelector:focus {
+  border: 1.5px solid #2563eb;
+}
