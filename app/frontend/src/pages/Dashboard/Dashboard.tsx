@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
     const ext = image.name.split('.').pop();
     const filename = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .storage
       .from('gallery')
       .upload(filename, image);

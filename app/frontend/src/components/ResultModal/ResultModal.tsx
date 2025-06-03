@@ -32,7 +32,7 @@ const ResultModal: React.FC<ResultModalProps> = ({
           </span>
           <div className={styles.model}>{model}</div>
           <ul className={styles.confidenceList}>
-            {confidences.map((item, idx) => (
+            {confidences.map((item) => (
               <li
                 key={item.label}
                 className={styles.confidenceItem}
