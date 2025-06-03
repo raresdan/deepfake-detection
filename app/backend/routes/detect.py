@@ -1,8 +1,54 @@
 from flask import Blueprint, request, jsonify
 from utils.face import decode_image, detect_faces_local
 from utils.deepfake import run_deepfake_model
+from utils.models import load_efficientnet_multiclass# load_xception, load_resnet  # Add your actual loader functions
+import os
 
 bp = Blueprint("detect", __name__, url_prefix="/api")
+
+# --- Model Loading (at startup) ---
+MODELS_DIR = os.path.join(os.path.dirname(__file__), '..', 'models')
+MODELS_DIR = os.path.abspath(MODELS_DIR)
+
+AVAILABLE_MODELS = [
+    {
+        "value": "xception",
+        "label": "XceptionNet",
+        "desc": "Slower but more accurate predictions",
+        # "func": load_xception
+    },
+    {
+        "value": "resnet",
+        "label": "ResNet",
+        "desc": "Fast, good for real-time",
+        # "func": load_resnet
+    },
+    {
+        "value": "efficientnet_multiclass",
+        "label": "EfficientNet",
+        "desc": "Balanced speed and accuracy",
+        "func": load_efficientnet_multiclass
+    }
+]
+
+MODELS = {}
+for model in AVAILABLE_MODELS:
+    model_id = model["value"]
+    if "func" in model:
+        print(f"Loading model: {model_id}")
+        MODELS[model_id] = model["func"]()
+    else:
+        print(f"WARNING: Loader function for '{model_id}' not defined")
+
+
+class_to_label = {
+    "class_0": "Real",
+    "class_1": "Stable Diffusion XL",
+    "class_2": "StyleGAN1",
+    "class_3": "StyleGAN2",
+    "class_4": "StyleGAN3",
+    "class_5": "thispersondoesnotexist"
+}
 
 @bp.route('/validate-face', methods=['POST'])
 def validate_face():
@@ -24,18 +70,40 @@ def detect():
     file_bytes = file.read()
     if not file_bytes:
         return jsonify({"error": "Empty file"}), 400
+
     img = decode_image(file_bytes)
     if img is None:
         return jsonify({"error": "Invalid image"}), 400
+
     faces, error = detect_faces_local(file_bytes)
     if error is not None:
         return jsonify({"error": "Face detection API error", "details": error}), 502
     if not faces:
         return jsonify({"error": "No face detected"}), 200
-    verdict, confidences = run_deepfake_model(img, faces)
-    heatmap = None
+
+    model = MODELS.get(model_id)
+    if model is None:
+        return jsonify({"error": f"Model '{model_id}' not available."}), 400
+
+    verdict, top3 = run_deepfake_model(img, faces, model=model)
+
+    # Translate class names to human-readable labels
+    translated_top3 = [
+        {"label": class_to_label.get(cls, cls), "score": float(score)}
+        for cls, score in top3
+    ]
+
+    print(f"Model: {model_id}, Verdict: {verdict}, Top 3: {translated_top3}")
     return jsonify({
         "verdict": verdict,
-        "confidences": confidences,
-        "heatmap": heatmap
+        "confidences": translated_top3
     })
+
+@bp.route('/models', methods=['GET'])
+def get_models():
+    models_no_func = [
+        {k: v for k, v in model.items() if k != "func"}
+        for model in AVAILABLE_MODELS
+    ]
+    return jsonify({"models": models_no_func})
+

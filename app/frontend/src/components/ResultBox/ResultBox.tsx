@@ -3,7 +3,7 @@ import Button from "../../components/Button/Button";
 
 interface DetectionResult {
   verdict: "real" | "fake";
-  confidences: Record<string, number>;
+  confidences: { label: string; score: number }[];
 }
 
 const ResultBox = ({
@@ -18,19 +18,30 @@ const ResultBox = ({
   loading: boolean;
 }) => (
   <div className={styles.resultBox}>
-    <div className={styles.resultVerdict}>
+    <div
+      className={styles.resultVerdict}
+      data-verdict={result.verdict}
+    >
       {result.verdict === "real" ? "🟢 Real" : "🔴 Fake"}
     </div>
-    <div className={styles.confidences}>
-      <div>Model Confidence:</div>
-      <ul>
-        {Object.entries(result.confidences).map(([model, conf]) => (
-          <li key={model}>
-            <b>{model}</b>: {(conf * 100).toFixed(2)}%
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className={styles.confidenceList}>
+      {result.confidences.map((item, idx) => (
+        <li
+          key={idx}
+          className={styles.confidenceItem}
+          style={{
+            borderBottom: idx < result.confidences.length - 1 ? "1px solid #eee" : "none",
+          }}
+        >
+          <span className={styles.confidenceLabel} title={item.label}>
+            {item.label}
+          </span>
+          <span className={styles.confidenceScore}>
+            {(item.score * 100).toFixed(1)}%
+          </span>
+        </li>
+      ))}
+    </ul>
     <Button
       className={styles.actionBtn}
       onClick={onSave}

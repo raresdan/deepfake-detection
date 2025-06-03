@@ -11,14 +11,14 @@ import styles from "./Dashboard.module.css";
 
 interface DetectionResult {
   verdict: "real" | "fake";
-  confidences: Record<string, number>;
+  confidences: { label: string; score: number }[];
 }
 
-const availableModels = [
-  { value: "xception", label: "XceptionNet", desc: "Slower but more accurate predictions" },
-  { value: "resnet", label: "ResNet", desc: "Fast, good for real-time" },
-  { value: "efficientnet", label: "EfficientNet", desc: "Balanced speed and accuracy" }
-];
+interface ModelOption {
+  value: string;
+  label: string;
+  desc: string;
+}
 
 const Dashboard: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -31,6 +31,9 @@ const Dashboard: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [faceValid, setFaceValid] = useState<boolean | null>(null);
+  const [availableModels, setAvailableModels] = useState<ModelOption[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(true);
+  const [modelsError, setModelsError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,6 +52,22 @@ const Dashboard: React.FC = () => {
     return () => {
       listener?.subscription.unsubscribe();
     };
+  }, [navigate]);
+
+  useEffect(() => {
+    // Fetch models from API
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      setModelsError(null);
+      try {
+        const response = await axios.get("/api/models");
+        setAvailableModels(response.data.models || []);
+      } catch (err: any) {
+        setModelsError("Failed to load models.");
+      }
+      setModelsLoading(false);
+    };
+    fetchModels();
   }, [navigate]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,12 +225,18 @@ const Dashboard: React.FC = () => {
         <div className={styles.dashboardSubtitle}>
           Select a detection model and upload an image to get started!
         </div>
-        <ModelSelector
-          model={model}
-          setModel={setModel}
-          disabled={loading}
-          models={availableModels}
-        />
+        {modelsLoading ? (
+          <div>Loading models...</div>
+        ) : modelsError ? (
+          <div className={styles.errorMsg}>{modelsError}</div>
+        ) : (
+          <ModelSelector
+            model={model}
+            setModel={setModel}
+            disabled={loading}
+            models={availableModels}
+          />
+        )}
         <UploadArea
           imagePreview={imagePreview}
           onImageChange={handleImageChange}

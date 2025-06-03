@@ -1,18 +1,22 @@
 import React from "react";
 import styles from "./ResultModal.module.css";
 
+interface Confidence {
+  label: string;
+  score: number;
+}
+
 interface ResultModalProps {
   open: boolean;
   onClose: () => void;
   imageUrl: string;
   verdict: string;
   model: string;
-  date: string;
-  confidences: Record<string, number>;
+  confidences: Confidence[]; 
 }
 
 const ResultModal: React.FC<ResultModalProps> = ({
-  open, onClose, imageUrl, verdict, model, date, confidences
+  open, onClose, imageUrl, verdict, model, confidences
 }) => {
   if (!open) return null;
 
@@ -27,15 +31,21 @@ const ResultModal: React.FC<ResultModalProps> = ({
             {verdict.toUpperCase()}
           </span>
           <div className={styles.model}>{model}</div>
-          <div className={styles.date}>{date}</div>
-          <div className={styles.confidences}>
-            {Object.entries(confidences).map(([model, conf], idx, arr) => (
-              <span key={model}>
-                {model}: {(conf * 100).toFixed(1)}%
-                {idx < arr.length - 1 && <span className={styles.sep}> | </span>}
-              </span>
+          <ul className={styles.confidenceList}>
+            {confidences.map((item, idx) => (
+              <li
+                key={item.label}
+                className={styles.confidenceItem}
+              >
+                <span className={styles.confidenceLabel} title={item.label}>
+                  {item.label}
+                </span>
+                <span className={styles.confidenceScore}>
+                  {(item.score * 100).toFixed(1)}%
+                </span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
     </div>

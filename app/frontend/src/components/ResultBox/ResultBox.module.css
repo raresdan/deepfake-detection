@@ -15,29 +15,54 @@
 }
 
 .resultVerdict {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin-bottom: 1rem;
-  color: #fff;
+  color: #e74c3c;
   letter-spacing: 1px;
 }
+.resultVerdict[data-verdict="real"] {
+  color: #27ae60;
+}
 
-.confidences {
-  margin-bottom: 1.4rem;
-  color: #c7d2fe;
+.confidenceList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
   width: 100%;
-  font-size: 1.05rem;
 }
-.confidences ul {
-  padding-left: 1.2em;
-  margin: 0.5em 0 0 0;
+
+.confidenceItem {
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  gap: 1.5rem;
+  border-bottom: 1px solid #eee;
 }
-.confidences li {
-  word-break: break-word;    /* <-- add this for safety */
-  overflow-wrap: break-word;
+.confidenceItem:last-child {
+  border-bottom: none;
+}
+
+.confidenceLabel {
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+  display: inline-block;
+}
+
+.confidenceScore {
+  font-weight: 500;
+  min-width: 60px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .actionBtn {
-  margin-top: 0.8rem;
+  margin-top: 1.2rem;
+  width: 100%;
   min-width: 130px;
 }

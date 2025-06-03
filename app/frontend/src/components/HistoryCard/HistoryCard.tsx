@@ -5,11 +5,10 @@ interface HistoryCardProps {
   imageUrl: string;
   verdict: string;
   model: string;
-  date: string;
   onClick: () => void;
 }
 
-const HistoryCard: React.FC<HistoryCardProps> = ({ imageUrl, verdict, model, date, onClick }) => (
+const HistoryCard: React.FC<HistoryCardProps> = ({ imageUrl, verdict, model, onClick }) => (
   <div className={styles.card} onClick={onClick}>
     <img src={imageUrl} alt="Detected face" className={styles.cardImg} />
     <div className={styles.cardFooter}>
@@ -17,7 +16,6 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ imageUrl, verdict, model, dat
         {verdict.toUpperCase()}
       </span>
       <span>{model}</span>
-      <span>{date}</span>
     </div>
   </div>
 );
