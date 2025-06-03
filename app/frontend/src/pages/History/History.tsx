@@ -1,32 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TopBar from "../../components/TopBar/TopBar";
 import styles from "./History.module.css";
 import HistoryCard from "../../components/HistoryCard/HistoryCard";
 import ResultModal from "../../components/ResultModal/ResultModal";
-
-
-const dummyGallery = [
-  {
-    id: 1,
-    imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-    verdict: "fake",
-    confidences: { xception: 0.92, resnet: 0.85, efficientnet: 0.88 },
-    model: "xception",
-    date: "2025-06-02",
-  },
-  {
-    id: 2,
-    imageUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-    verdict: "real",
-    confidences: { xception: 0.12, resnet: 0.15, efficientnet: 0.18 },
-    model: "resnet",
-    date: "2025-06-01",
-  }
-];
+import { supabase } from "../../services/supabaseClient";
 
 const History: React.FC = () => {
-  const [gallery] = useState(dummyGallery);
-  const [selected, setSelected] = useState<typeof dummyGallery[0] | null>(null);
+  const [gallery, setGallery] = useState<any[]>([]);
+  const [selected, setSelected] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      setLoading(true);
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await fetch("/api/history/images", {
+          headers,
+          credentials: "include", // in case you use cookies
+        });
+
+        if (res.status === 401) {
+          setGallery([]);
+          setLoading(false);
+          // Optionally redirect to login or show a message
+          return;
+        }
+
+        const result = await res.json();
+        if (result.images) {
+          setGallery(
+            result.images.map((img: any) => ({
+              id: img.id,
+              imageUrl: img.imageUrl,
+              verdict: img.results?.verdict || "",
+              confidences: img.results?.confidences || {},
+              model: img.results?.model || "",
+              date: img.created_at ? img.created_at.slice(0, 10) : "",
+            }))
+          );
+        } else {
+          setGallery([]);
+        }
+      } catch (e) {
+        setGallery([]);
+      }
+      setLoading(false);
+    };
+    fetchImages();
+  }, []);
 
   return (
     <div className={styles.historyBg}>
@@ -34,7 +63,9 @@ const History: React.FC = () => {
       <main className={styles.mainArea}>
         <h1 className={styles.title}>Detection History</h1>
         <div className={styles.galleryGrid}>
-          {gallery.length === 0 ? (
+          {loading ? (
+            <div className={styles.emptyMsg}>Loading...</div>
+          ) : gallery.length === 0 ? (
             <div className={styles.emptyMsg}>No detections saved yet.</div>
           ) : (
             gallery.map((item) => (

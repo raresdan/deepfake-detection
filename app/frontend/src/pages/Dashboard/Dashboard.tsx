@@ -119,6 +119,30 @@ const Dashboard: React.FC = () => {
     setLoading(false);
   };
 
+  // Helper function to upload image to Supabase Storage
+  async function uploadToSupabase(image: File, userId: string): Promise<{ path: string, url: string }> {
+    const ext = image.name.split('.').pop();
+    const filename = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { data, error } = await supabase
+      .storage
+      .from('gallery')
+      .upload(filename, image);
+
+    if (error) {
+      console.error("Supabase upload error:", error);
+      setError("Upload failed: " + error.message);
+      throw error;
+    }
+
+    const { data: urlData } = supabase
+      .storage
+      .from('gallery') 
+      .getPublicUrl(filename);
+
+    return { path: filename, url: urlData.publicUrl };
+  }
+
   const handleSave = async () => {
     if (!result || !image) return;
     setLoading(true);
@@ -126,20 +150,31 @@ const Dashboard: React.FC = () => {
 
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
+    const userId = data.session?.user?.id;
+
+    if (!userId) {
+      setError("User ID not found. Please re-login.");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const saveForm = new FormData();
-      saveForm.append("image", image);
-      saveForm.append("verdict", result.verdict);
-      saveForm.append("confidences", JSON.stringify(result.confidences));
-      saveForm.append("model", model);
+      const { path, url } = await uploadToSupabase(image, userId);
+
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/save-detection`,
-        saveForm,
+        "/api/user/save-detection",
+        {
+          bucket: 'gallery',
+          object_path: path,
+          image_url: url,
+          verdict: result.verdict,
+          confidences: result.confidences,
+          model: model,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         }
       );
