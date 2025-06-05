@@ -12,6 +12,7 @@ import styles from "./Dashboard.module.css";
 interface DetectionResult {
   verdict: "real" | "fake";
   confidences: { label: string; score: number }[];
+  grad_cam_url?: string; // <-- Add this line
 }
 
 interface ModelOption {
@@ -34,6 +35,7 @@ const Dashboard: React.FC = () => {
   const [availableModels, setAvailableModels] = useState<ModelOption[]>([]);
   const [modelsLoading, setModelsLoading] = useState(true);
   const [modelsError, setModelsError] = useState<string | null>(null);
+  const [useGradCam, setUseGradCam] = useState(true); // Grad-CAM checkbox state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -116,6 +118,7 @@ const Dashboard: React.FC = () => {
     const formData = new FormData();
     formData.append("image", image);
     formData.append("model", model);
+    formData.append("gradcam", useGradCam ? "true" : "false"); // Send Grad-CAM preference
 
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
@@ -189,6 +192,9 @@ const Dashboard: React.FC = () => {
           verdict: result.verdict,
           confidences: result.confidences,
           model: model,
+          gradcam_path: result.grad_cam_url 
+            ? result.grad_cam_url.split("/").pop()
+            : null,
         },
         {
           headers: {
@@ -225,6 +231,7 @@ const Dashboard: React.FC = () => {
         <div className={styles.dashboardSubtitle}>
           Select a detection model and upload an image to get started!
         </div>
+        
         {modelsLoading ? (
           <div>Loading models...</div>
         ) : modelsError ? (
@@ -237,6 +244,20 @@ const Dashboard: React.FC = () => {
             models={availableModels}
           />
         )}
+        <div className={styles.gradCamCheckboxContainer}>
+          <label className={styles.gradCamCheckboxLabel}>
+            <input
+              type="checkbox"
+              checked={useGradCam}
+              onChange={e => setUseGradCam(e.target.checked)}
+              style={{ accentColor: "#6a54fa", width: 18, height: 18 }}
+            />
+            Advance Analysis using Grad-CAM
+          </label>
+          <div className={styles.gradCamCheckboxDescription}>
+            See how the model decides.
+          </div>
+        </div>
         <UploadArea
           imagePreview={imagePreview}
           onImageChange={handleImageChange}
@@ -271,7 +292,7 @@ const Dashboard: React.FC = () => {
             onSave={handleSave}
             saveSuccess={saveSuccess}
             loading={loading}
-
+            gradCamUrl={result.grad_cam_url}
           />
         )}
       </main>

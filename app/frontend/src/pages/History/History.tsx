@@ -40,10 +40,10 @@ const History: React.FC = () => {
             result.images.map((img: any) => ({
               id: img.id,
               imageUrl: img.imageUrl,
+              gradcamUrl: img.gradcamUrl,
               verdict: img.results?.verdict || "",
               confidences: img.results?.confidences || {},
               model: img.results?.model || "",
-              date: img.created_at ? img.created_at.slice(0, 10) : "",
             }))
           );
         } else {
@@ -74,7 +74,6 @@ const History: React.FC = () => {
                 imageUrl={item.imageUrl}
                 verdict={item.verdict}
                 model={item.model}
-                date={item.date}
                 onClick={() => setSelected(item)}
               />
             ))
@@ -84,9 +83,9 @@ const History: React.FC = () => {
           open={!!selected}
           onClose={() => setSelected(null)}
           imageUrl={selected?.imageUrl || ""}
+          gradcamUrl={selected?.gradcamUrl || ""}
           verdict={selected?.verdict || ""}
           model={selected?.model || ""}
-          date={selected?.date || ""}
           confidences={selected?.confidences || {}}
         />
       </main>

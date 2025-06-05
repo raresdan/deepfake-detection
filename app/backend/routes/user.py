@@ -34,7 +34,8 @@ def save_detection():
         "user_id": user_id,
         "bucket": data["bucket"],
         "object_path": data["object_path"],
-        "results": results
+        "results": results,
+        "gradcam_path": data.get("gradcam_path", None),
     }
     response = supabase.table("Images").insert(insert_data).execute()
     if getattr(response, "error", None) is not None or not response.data:

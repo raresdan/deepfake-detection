@@ -1,8 +1,11 @@
 from flask import Blueprint, request, jsonify
 from utils.face import decode_image, detect_faces_local
 from utils.deepfake import run_deepfake_model
-from utils.models import load_efficientnet_multiclass# load_xception, load_resnet  # Add your actual loader functions
+from models_architectures.efficient_net import load_efficientnet_multiclass
+from supabase import create_client, Client
 import os
+import uuid
+import base64
 
 bp = Blueprint("detect", __name__, url_prefix="/api")
 
@@ -15,21 +18,25 @@ AVAILABLE_MODELS = [
         "value": "xception",
         "label": "XceptionNet",
         "desc": "Slower but more accurate predictions",
-        # "func": load_xception
+        # "func": load_xception,
+        "target_layer": lambda model: model.block[-1],  # <-- Adjust to your actual last conv
     },
     {
         "value": "resnet",
         "label": "ResNet",
         "desc": "Fast, good for real-time",
-        # "func": load_resnet
+        # "func": load_resnet,
+        "target_layer": lambda model: model.layer4[-1],  # Standard for ResNet
     },
     {
         "value": "efficientnet_multiclass",
         "label": "EfficientNet",
         "desc": "Balanced speed and accuracy",
-        "func": load_efficientnet_multiclass
+        "func": load_efficientnet_multiclass,
+        "target_layer": lambda model: model.backbone.blocks[-1],  # For timm EfficientNet
     }
 ]
+
 
 MODELS = {}
 for model in AVAILABLE_MODELS:
@@ -50,6 +57,11 @@ class_to_label = {
     "class_5": "thispersondoesnotexist"
 }
 
+# Initialize Supabase client (do this once, at the top)
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 @bp.route('/validate-face', methods=['POST'])
 def validate_face():
     if 'image' not in request.files:
@@ -60,6 +72,13 @@ def validate_face():
     faces, error = detect_faces_local(file_bytes)
     return jsonify({"valid": bool(faces)})
 
+
+def get_gradcam_layer(model_id, model):
+    # Find the model config in AVAILABLE_MODELS
+    for m in AVAILABLE_MODELS:
+        if m["value"] == model_id and "target_layer" in m:
+            return m["target_layer"](model)
+    return None
 
 @bp.route('/detect', methods=['POST'])
 def detect():
@@ -85,7 +104,24 @@ def detect():
     if model is None:
         return jsonify({"error": f"Model '{model_id}' not available."}), 400
 
-    verdict, top3 = run_deepfake_model(img, faces, model=model)
+    # --- Grad-CAM logic ---
+    gradcam_requested = request.form.get("gradcam", "false").lower() == "true"
+    gradcam_layer = None
+    gradcam_url = None
+    if gradcam_requested:
+        gradcam_layer = get_gradcam_layer(model_id, model)  # <-- Use helper function
+        verdict, top3, gradcam_b64 = run_deepfake_model(
+            img, faces, model=model, return_gradcam=True, gradcam_layer=gradcam_layer
+        )
+        # --- Upload Grad-CAM to Supabase ---
+        gradcam_bytes = base64.b64decode(gradcam_b64)
+        gradcam_filename = f"gradcam_{uuid.uuid4().hex}.png"
+        # Upload to 'gallery' bucket
+        res = supabase.storage.from_("gallery").upload(gradcam_filename, gradcam_bytes, {"content-type": "image/png"})
+        # Get public URL
+        gradcam_url = supabase.storage.from_("gallery").get_public_url(gradcam_filename)
+    else:
+        verdict, top3 = run_deepfake_model(img, faces, model=model)
 
     # Translate class names to human-readable labels
     translated_top3 = [
@@ -93,16 +129,21 @@ def detect():
         for cls, score in top3
     ]
 
-    print(f"Model: {model_id}, Verdict: {verdict}, Top 3: {translated_top3}")
-    return jsonify({
+    response = {
         "verdict": verdict,
         "confidences": translated_top3
-    })
+    }
+    if gradcam_requested and gradcam_url:
+        response["grad_cam_url"] = gradcam_url  # <-- Now a Supabase public URL
+
+    print(f"Model: {model_id}, Verdict: {verdict}, Top 3: {translated_top3}, Grad-CAM URL: {gradcam_url}")
+    return jsonify(response)
+
 
 @bp.route('/models', methods=['GET'])
 def get_models():
     models_no_func = [
-        {k: v for k, v in model.items() if k != "func"}
+        {k: v for k, v in model.items() if k != "func" and k != "target_layer"}
         for model in AVAILABLE_MODELS
     ]
     return jsonify({"models": models_no_func})

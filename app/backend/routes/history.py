@@ -30,13 +30,14 @@ def get_user_images():
     for img in images:
         bucket = img.get("bucket")
         object_path = img.get("object_path")
+        gradcam_path = img.get("gradcam_path")
         if bucket and object_path:
-            print("BUCKET:", bucket)
-            print("OBJECT_PATH:", object_path)
-
-            public_url = supabase.storage.from_(bucket).get_public_url(object_path)
-            img["imageUrl"] = public_url
+            img["imageUrl"] = supabase.storage.from_(bucket).get_public_url(object_path)
         else:
             img["imageUrl"] = ""
+        if bucket and gradcam_path:
+            img["gradcamUrl"] = supabase.storage.from_(bucket).get_public_url(gradcam_path)
+        else:
+            img["gradcamUrl"] = ""
 
     return jsonify({"images": images})
