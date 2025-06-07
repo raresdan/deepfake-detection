@@ -4,7 +4,7 @@ import Button from "../../components/Button/Button";
 interface DetectionResult {
   verdict: "real" | "fake";
   confidences: { label: string; score: number }[];
-  grad_cam_url?: string; // Add this line
+  grad_cam_url?: string;
 }
 
 const ResultBox = ({
@@ -20,7 +20,6 @@ const ResultBox = ({
   loading: boolean;
   gradCamUrl?: string;
 }) => {
-  console.log("Grad-CAM URL:", gradCamUrl); // Add this line
   return (
     <div className={styles.resultBox}>
       <div
@@ -34,9 +33,6 @@ const ResultBox = ({
           <li
             key={idx}
             className={styles.confidenceItem}
-            style={{
-              borderBottom: idx < result.confidences.length - 1 ? "1px solid #eee" : "none",
-            }}
           >
             <span className={styles.confidenceLabel} title={item.label}>
               {item.label}
@@ -55,7 +51,6 @@ const ResultBox = ({
             src={gradCamUrl}
             alt="Grad-CAM"
             className={styles.gradCamImage}
-            style={{ maxWidth: "100%", marginTop: 12, borderRadius: 8 }}
           />
         </div>
       )}

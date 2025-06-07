@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import TopBar from "../../components/TopBar/TopBar";
 import styles from "./History.module.css";
 import HistoryCard from "../../components/HistoryCard/HistoryCard";
@@ -9,31 +10,30 @@ const History: React.FC = () => {
   const [gallery, setGallery] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const checkAuthAndFetch = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        navigate("/login", { replace: true });
+        return;
+      }
+
       setLoading(true);
       try {
-        const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
-
         const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-
+        if (token) headers["Authorization"] = `Bearer ${token}`;
         const res = await fetch("/api/history/images", {
           headers,
-          credentials: "include", // in case you use cookies
+          credentials: "include",
         });
-
         if (res.status === 401) {
           setGallery([]);
           setLoading(false);
-          // Optionally redirect to login or show a message
           return;
         }
-
         const result = await res.json();
         if (result.images) {
           setGallery(
@@ -54,12 +54,12 @@ const History: React.FC = () => {
       }
       setLoading(false);
     };
-    fetchImages();
-  }, []);
+    checkAuthAndFetch();
+  }, [navigate]);
 
   return (
     <div className={styles.historyBg}>
-      <TopBar onLogout={() => {}} userName="Rares" />
+      <TopBar />
       <main className={styles.mainArea}>
         <h1 className={styles.title}>Detection History</h1>
         <div className={styles.galleryGrid}>

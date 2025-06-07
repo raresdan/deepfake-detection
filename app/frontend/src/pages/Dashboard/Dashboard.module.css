@@ -4,7 +4,7 @@
   background: linear-gradient(120deg, #111827 0%, #20232b 50%, #23272f 100%);
   display: flex;
   flex-direction: column;
-  overflow-x: clip; /* or hidden if clip is not supported */
+  overflow-x: clip;
 }
 
 .mainArea {
@@ -74,4 +74,10 @@
   margin-top: 0.2rem;
   text-align: center;
   width: 100%;
+}
+
+.gradCamCheckbox {
+  accent-color: #6a54fa;
+  width: 18px;
+  height: 18px;
 }

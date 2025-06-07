@@ -5,7 +5,6 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button/Button";
 import { FcGoogle } from "react-icons/fc";
 
-
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,21 +26,20 @@ const Login: React.FC = () => {
     if (error) {
       setError(error.message);
     } else {
-      // Success: Redirect or update global auth state here
       navigate("/dashboard");
     }
-
     setLoading(false);
   };
 
-  // Google login handler
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithOAuth({ 
-      provider: "google",options: {
-      redirectTo: `${window.location.origin}/dashboard`,
-    } });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
     if (error) setError(error.message);
     setLoading(false);
   };
@@ -69,30 +67,23 @@ const Login: React.FC = () => {
           required
           autoComplete="current-password"
         />
-       <Button type="submit" disabled={loading} style={{ width: "100%" }}>
+        <Button type="submit" disabled={loading} className={styles.buttonFullWidth}>
           {loading ? "Logging in..." : "Login"}
         </Button>
         <Button
           type="button"
           variant="secondary"
           onClick={handleGoogleLogin}
-          style={{
-            width: "100%",
-            marginTop: "1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.7rem"
-          }}
+          className={`${styles.buttonFullWidth} ${styles.buttonGoogle}`}
           disabled={loading}
         >
-          <FcGoogle size={22} style={{ verticalAlign: "middle" }} />
+          <FcGoogle size={22} className={styles.googleIcon} />
           Login with Google
         </Button>
         {error && <div className={`${styles.statusMsg} ${styles.errorMsg}`}>{error}</div>}
-        <div style={{ marginTop: "1.2rem", fontSize: "1rem", color: "#a3aed6" }}>
+        <div className={styles.switchLine}>
           Don't have an account?{" "}
-          <Link to="/register" style={{ color: "#39ffa0", textDecoration: "underline" }}>
+          <Link to="/register" className={styles.switchLink}>
             Register
           </Link>
         </div>

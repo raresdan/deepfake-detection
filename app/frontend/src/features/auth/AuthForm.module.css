@@ -34,7 +34,7 @@
   background: rgba(30, 35, 48, 0.96);
   border-radius: 1.25rem;
   box-shadow: 0 8px 48px #0008;
-  padding: 2.5rem 2rem 2rem 2rem;
+  padding: 2.5rem 2rem;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -94,6 +94,23 @@
   box-shadow: 0 4px 40px #6366f188;
 }
 
+.buttonFullWidth {
+  width: 100%;
+}
+
+.buttonGoogle {
+  width: 100%;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.googleIcon {
+  vertical-align: middle;
+}
+
 .statusMsg {
   margin-top: 1.2rem;
   font-size: 1rem;
@@ -106,4 +123,16 @@
 
 .successMsg {
   color: #39ffa0;
+}
+
+.switchLine {
+  margin-top: 1.2rem;
+  font-size: 1rem;
+  color: #a3aed6;
+  text-align: center;
+}
+
+.switchLink {
+  color: #39ffa0;
+  text-decoration: underline;
 }

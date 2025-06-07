@@ -20,28 +20,35 @@ const UploadArea = ({
 }) => (
   <div className={styles.uploadBox}>
     {imagePreview ? (
-      <div style={{ position: "relative" }}>
+      <div className={styles.imagePreviewContainer}>
         <img src={imagePreview} alt="preview" className={styles.imagePreview} />
         <Button
-          style={{ position: "absolute", top: 8, right: 8, padding: "0.2rem 0.6rem" }}
+          className={styles.clearButton}
           onClick={onClear}
           variant="secondary"
           aria-label="Clear image"
-        >✕</Button>
+        >
+          ✕
+        </Button>
       </div>
     ) : (
       <label
-        className={styles.uploadLabel}
-        onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-        onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-        onDrop={e => {
+        className={`${styles.uploadLabel} ${dragActive ? styles.dragActive : ""}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragActive(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setDragActive(false);
+        }}
+        onDrop={(e) => {
           e.preventDefault();
           setDragActive(false);
           if (e.dataTransfer.files?.[0]) {
             onImageChange({ target: { files: e.dataTransfer.files } } as any);
           }
         }}
-        style={dragActive ? { borderColor: "#2563eb", background: "#23272f" } : {}}
         aria-label="Upload image"
       >
         <input
@@ -52,7 +59,7 @@ const UploadArea = ({
           disabled={loading}
         />
         <div className={styles.uploadContent}>
-          <UploadCloud size={38} color="#2563eb" style={{ marginBottom: 8 }} />
+          <UploadCloud className={styles.uploadIcon} />
           <span>
             {dragActive ? "Drop image here..." : "Click or drag an image here to upload"}
           </span>

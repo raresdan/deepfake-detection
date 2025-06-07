@@ -9,7 +9,6 @@
   box-shadow: 0 2px 8px #0002;
   border-bottom: 1px solid #23272f;
   z-index: 10;
-
 }
 
 .left {
@@ -67,7 +66,7 @@
   box-shadow: 0 4px 16px #0005;
   padding: 0.7rem 1.2rem;
   min-width: 120px;
-  z-index: 9999; 
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -78,7 +77,7 @@
   background: none;
   color: #ff2834;
   border: none;
-  padding: 0.5rem 0.5rem; /* Add horizontal padding */
+  padding: 0.5rem 0.5rem;
   text-align: center;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -89,7 +88,27 @@
 }
 
 .logoutBtn:hover {
-  background: #ff2834 !important; /* Ensure the red is applied */
+  background: #ff2834 !important;
   color: #fff;
   box-shadow: 0 2px 8px #ff283488;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  stroke-width: 2;
+}
+
+.iconLarge {
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  stroke-width: 2;
+}
+
+.greeting {
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
 }

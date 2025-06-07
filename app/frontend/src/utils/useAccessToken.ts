@@ -10,7 +10,6 @@ export const useAccessToken = () => {
       setToken(data.session?.access_token ?? null);
     };
     getToken();
-    // Optional: subscribe to session changes if your app needs it
   }, []);
 
   return token;

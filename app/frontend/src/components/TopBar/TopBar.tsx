@@ -2,15 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./TopBar.module.css";
 import Button from "../../components/Button/Button";
-import { History, UserRound, LayoutDashboard } from "lucide-react"; // Import dashboard icon
+import { supabase } from "../../services/supabaseClient";
+import { History, UserRound, LayoutDashboard } from "lucide-react";
 
-const TopBar = ({
-  onLogout,
-  userName,
-}: {
-  onLogout: () => void;
-  userName: string;
-}) => {
+const TopBar: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -26,6 +21,16 @@ const TopBar = ({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showMenu]);
 
+  // Handle logout functionality
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut(); // Sign out the user
+      navigate("/login"); // Redirect to the login page
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   return (
     <nav className={styles.topBar}>
       <div className={styles.left}>
@@ -34,7 +39,7 @@ const TopBar = ({
           variant="secondary"
           className={styles.historyBtn}
         >
-          <LayoutDashboard size={20} color="#fff" strokeWidth={2} />
+          <LayoutDashboard className={styles.icon} />
           <span>Dashboard</span>
         </Button>
         <Button
@@ -42,7 +47,7 @@ const TopBar = ({
           variant="secondary"
           className={styles.historyBtn}
         >
-          <History size={20} color="#fff" strokeWidth={2} />
+          <History className={styles.icon} />
           <span>History</span>
         </Button>
       </div>
@@ -53,13 +58,12 @@ const TopBar = ({
           tabIndex={0}
           aria-label="Open profile menu"
         >
-          <UserRound size={28} color="#fff" strokeWidth={2} />
+          <UserRound className={styles.iconLarge} />
         </div>
         {showMenu && (
           <div className={styles.profileMenu} ref={menuRef}>
-            <div className={styles.greeting}>Hello, {userName}</div>
             <Button
-              onClick={onLogout}
+              onClick={handleLogout}
               variant="secondary"
               className={styles.logoutBtn}
             >

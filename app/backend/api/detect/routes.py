@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from utils.auth import require_auth
 from .service import (
     validate_face_service,
     detect_service,
@@ -12,6 +13,7 @@ def validate_face():
     return validate_face_service(request)
 
 @bp.route('/detect', methods=['POST'])
+@require_auth
 def detect():
     return detect_service(request)
 

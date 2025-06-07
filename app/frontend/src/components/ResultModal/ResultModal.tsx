@@ -35,7 +35,6 @@ const ResultModal: React.FC<ResultModalProps> = ({
 
   if (!open) return null;
 
-  // Zoom control block, with color and icons
   const ZoomControls = ({
     zoom,
     setZoom,
@@ -48,7 +47,7 @@ const ResultModal: React.FC<ResultModalProps> = ({
         aria-label={`Zoom out ${label}`}
         type="button"
       >
-        <MdZoomOut size={22} color="white" />
+        <MdZoomOut className={styles.zoomIcon} />
       </button>
       <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
       <button
@@ -57,10 +56,17 @@ const ResultModal: React.FC<ResultModalProps> = ({
         aria-label={`Zoom in ${label}`}
         type="button"
       >
-        <MdZoomIn size={22} color="white" />
+        <MdZoomIn className={styles.zoomIcon} />
       </button>
     </div>
   );
+
+  // Add dynamic classes for zoom
+  const getZoomClass = (zoom: number) => {
+    if (zoom > 1.01) return styles.zoomedIn;
+    if (zoom < 0.99) return styles.zoomedOut;
+    return "";
+  };
 
   return (
     <div className={styles.overlay} aria-modal="true" role="dialog">
@@ -74,8 +80,9 @@ const ResultModal: React.FC<ResultModalProps> = ({
                 <img
                   src={imageUrl}
                   alt="Original uploaded for deepfake detection"
-                  className={styles.modalImg}
-                  style={{ transform: `scale(${zoomOriginal})` }}
+                  className={`${styles.modalImg} ${getZoomClass(zoomOriginal)}`}
+                  data-zoom={zoomOriginal}
+                  style={{ "--zoom": zoomOriginal } as React.CSSProperties}
                 />
               </div>
               <ZoomControls zoom={zoomOriginal} setZoom={setZoomOriginal} label="original" />
@@ -86,8 +93,9 @@ const ResultModal: React.FC<ResultModalProps> = ({
                 <img
                   src={gradcamUrl}
                   alt="GradCAM explanation"
-                  className={styles.modalImg}
-                  style={{ transform: `scale(${zoomGradcam})` }}
+                  className={`${styles.modalImg} ${getZoomClass(zoomGradcam)}`}
+                  data-zoom={zoomGradcam}
+                  style={{ "--zoom": zoomGradcam } as React.CSSProperties}
                 />
               </div>
               <ZoomControls zoom={zoomGradcam} setZoom={setZoomGradcam} label="GradCAM" />
@@ -100,8 +108,9 @@ const ResultModal: React.FC<ResultModalProps> = ({
               <img
                 src={imageUrl}
                 alt="Original uploaded for deepfake detection"
-                className={styles.modalImg}
-                style={{ transform: `scale(${zoomOriginal})` }}
+                className={`${styles.modalImg} ${getZoomClass(zoomOriginal)}`}
+                data-zoom={zoomOriginal}
+                style={{ "--zoom": zoomOriginal } as React.CSSProperties}
               />
             </div>
             <ZoomControls zoom={zoomOriginal} setZoom={setZoomOriginal} label="original" />

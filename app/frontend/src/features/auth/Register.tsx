@@ -3,7 +3,7 @@ import { supabase } from "../../services/supabaseClient";
 import styles from "./AuthForm.module.css";
 import Button from "../../components/Button/Button";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom"; // <-- add useNavigate
+import { Link, useNavigate } from "react-router-dom";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -11,7 +11,7 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const navigate = useNavigate(); // <-- add this
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,20 +27,18 @@ const Register: React.FC = () => {
     if (error) setError(error.message);
     else {
       setSuccess(true);
-      navigate("/dashboard"); // <-- redirect on success
+      navigate("/dashboard");
     }
 
     setLoading(false);
   };
 
-  // Google sign-up/login handler
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
     if (error) setError(error.message);
     setLoading(false);
-    // Supabase handles the redirect
   };
 
   return (
@@ -66,31 +64,24 @@ const Register: React.FC = () => {
           required
           autoComplete="new-password"
         />
-        <Button type="submit" disabled={loading} style={{ width: "100%" }}>
+        <Button type="submit" disabled={loading} className={styles.buttonFullWidth}>
           {loading ? "Registering..." : "Register"}
         </Button>
         <Button
           type="button"
           variant="secondary"
           onClick={handleGoogleLogin}
-          style={{
-            width: "100%",
-            marginTop: "1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.7rem"
-          }}
+          className={`${styles.buttonFullWidth} ${styles.buttonGoogle}`}
           disabled={loading}
         >
-          <FcGoogle size={22} style={{ verticalAlign: "middle" }} />
+          <FcGoogle size={22} className={styles.googleIcon} />
           Register with Google
         </Button>
         {error && <div className={`${styles.statusMsg} ${styles.errorMsg}`}>{error}</div>}
         {success && <div className={`${styles.statusMsg} ${styles.successMsg}`}>Check your email for confirmation!</div>}
-        <div style={{ marginTop: "1.2rem", fontSize: "1rem", color: "#a3aed6" }}>
+        <div className={styles.switchLine}>
           Already have an account?{" "}
-          <Link to="/login" style={{ color: "#39ffa0", textDecoration: "underline" }}>
+          <Link to="/login" className={styles.switchLink}>
             Login
           </Link>
         </div>
