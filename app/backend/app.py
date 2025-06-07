@@ -1,16 +1,20 @@
 from flask import Flask
 from config import Config
 from extensions import cors
-from routes import blueprints
+from api.detect import bp as detect_bp
+from api.history import bp as history_bp
+from api.user import bp as user_bp
+
+def register_blueprints(app):
+    app.register_blueprint(detect_bp)
+    app.register_blueprint(history_bp)
+    app.register_blueprint(user_bp)
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     cors.init_app(app)
-
-    # Register all blueprints
-    for bp in blueprints:
-        app.register_blueprint(bp)
+    register_blueprints(app)
 
     return app
 

@@ -1,25 +1,17 @@
-from flask import Blueprint, request, jsonify, g
-from utils.auth import require_auth
+from flask import jsonify, g, request
 from extensions import supabase
 
-bp = Blueprint("history", __name__, url_prefix="/api/history")
-
-# Dummy history (move to DB in prod)
+# Dummy history (to be removed if using DB)
 history = []
 
-
-@bp.route('/save', methods=['POST'])
-def save_to_history():
-    data = request.json
+def save_to_history_service(req):
+    data = req.json
     if not data or "image_id" not in data or "verdict" not in data:
         return jsonify({"error": "Missing data"}), 400
     history.append(data)
     return jsonify({"success": True})
 
-
-@bp.route('/images', methods=['GET'])
-@require_auth
-def get_user_images():
+def get_user_images_service():
     user_id = g.user_id
     response = supabase.table("Images").select("*").eq("user_id", user_id).execute()
     if getattr(response, "error", None) is not None:

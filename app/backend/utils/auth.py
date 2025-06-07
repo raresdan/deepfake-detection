@@ -5,6 +5,9 @@ from extensions import supabase
 def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        if supabase is None:
+            return jsonify({"error": "Supabase client not initialized"}), 500
+
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return jsonify({"error": "Missing or invalid Authorization header"}), 401

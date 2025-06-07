@@ -8,7 +8,6 @@ from PIL import Image
 
 
 def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
-    # Clear hooks/gradients
     gradients = []
     activations = []
 
@@ -18,7 +17,6 @@ def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
     def forward_hook(module, input, output):
         activations.append(output)
 
-    # Register hooks
     fwd_handle = target_layer.register_forward_hook(forward_hook)
     bwd_handle = target_layer.register_full_backward_hook(backward_hook)
 
@@ -27,7 +25,6 @@ def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
     if class_idx is None:
         class_idx = output.argmax(dim=1).item()
 
-    # Backpropagate for selected class
     loss = output[0, class_idx]
     model.zero_grad()
     loss.backward(retain_graph=True)

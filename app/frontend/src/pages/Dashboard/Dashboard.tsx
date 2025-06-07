@@ -255,7 +255,7 @@ const Dashboard: React.FC = () => {
             Advance Analysis using Grad-CAM
           </label>
           <div className={styles.gradCamCheckboxDescription}>
-            See how the model decides.
+            See how the model takes decisions.
           </div>
         </div>
         <UploadArea

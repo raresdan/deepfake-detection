@@ -1,13 +1,8 @@
-from flask import Blueprint, request, jsonify, g
+from flask import jsonify, request, g
 from extensions import supabase
-from utils.auth import require_auth
 
-bp = Blueprint("user", __name__, url_prefix="/api/user")
-
-
-@bp.route('/name', methods=['GET'])
-def get_user_name():
-    user_id = request.args.get("user_id")
+def get_user_name_service(req):
+    user_id = req.args.get("user_id")
     if not user_id:
         return jsonify({"error": "Missing user_id"}), 400
     response = supabase.table("users").select("name").eq("id", user_id).single().execute()
@@ -16,11 +11,8 @@ def get_user_name():
     else:
         return jsonify({"error": "User not found"}), 404
 
-
-@bp.route('/save-detection', methods=['POST'])
-@require_auth
-def save_detection():
-    data = request.json
+def save_detection_service(req):
+    data = req.json
     user_id = g.user_id
     required = ['bucket', 'object_path', 'verdict', 'confidences', 'model']
     if not all(k in data for k in required):
