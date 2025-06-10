@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import TopBar from "../../components/TopBar/TopBar";
 import UploadArea from "../../components/UploadArea/UploadArea";
 import ModelSelector from "../../components/ModelSelector/ModelSelector";
@@ -68,6 +69,16 @@ const Dashboard: React.FC = () => {
     setSaveError(null);
     await save(image, result, model);
   };
+
+  // Remove access_token from URL hash
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.hash.includes("access_token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [location, navigate]);
 
   if (authLoading) {
     return (
