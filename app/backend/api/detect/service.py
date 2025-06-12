@@ -6,6 +6,7 @@ from utils.deepfake import run_deepfake_model
 from models_architectures.efficient_net import load_efficientnet_multiclass
 from models_architectures.res_net import load_resnet_multiclass
 from models_architectures.vit import load_vit_multiclass
+from models_architectures.custom_net import load_custom_multiclass
 from supabase import create_client, Client
 from flask import jsonify, request
 
@@ -35,6 +36,13 @@ AVAILABLE_MODELS = [
         "desc": "Less explainability but more accurate predictions",
         "func": load_vit_multiclass,
         "target_layer": None,  # ViT does not use Grad-CAM in the same way
+    },
+    {
+        "value": "custom_multiclass",
+        "label": "Custom CNN",
+        "desc": "Custom architecture with SE blocks and attention",
+        "func": load_custom_multiclass,
+        "target_layer": lambda model: model.conv3, 
     },
 ]
 

@@ -16,6 +16,16 @@ def extract_tensor(x):
     return x
 
 
+def compute_fft_channel(img_np):
+    # img_np: [H,W,3] uint8 or float [0,255]
+    gray = np.mean(img_np, axis=2)
+    fft = np.abs(np.fft.fft2(gray))
+    fft = np.fft.fftshift(fft)
+    fft = np.log(fft + 1)
+    fft = (fft - fft.min()) / (fft.max() - fft.min() + 1e-8)
+    return fft.astype(np.float32)
+
+
 def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
     gradients = []
     activations = []
@@ -86,7 +96,14 @@ def run_deepfake_model(
         input_tensor = inputs["pixel_values"]
     else:
         face_norm = face_rgb / 255.0
-        face_input = np.transpose(face_norm, (2, 0, 1))[None, ...]
+        # Optionally add FFT as extra channel
+        if model.__class__.__name__ == "DeepfakeNet":
+            fft = compute_fft_channel(face_rgb)
+            face_input = np.transpose(face_norm, (2, 0, 1))  # (3, 224, 224)
+            face_input = np.concatenate([face_input, fft[None, ...]], axis=0)  # (4, 224, 224)
+            face_input = face_input[None, ...]
+        else:
+            face_input = np.transpose(face_norm, (2, 0, 1))[None, ...]
         face_input = np.ascontiguousarray(face_input, dtype=np.float32)
         input_tensor = torch.from_numpy(face_input)
 
