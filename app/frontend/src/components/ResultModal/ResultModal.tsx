@@ -10,6 +10,7 @@ interface Confidence {
 interface ResultModalProps {
   open: boolean;
   onClose: () => void;
+  onDelete?: () => void; // <-- add this
   imageUrl: string;
   verdict: string;
   model: string;
@@ -18,7 +19,7 @@ interface ResultModalProps {
 }
 
 const ResultModal: React.FC<ResultModalProps> = ({
-  open, onClose, imageUrl, verdict, model, confidences, gradcamUrl
+  open, onClose, imageUrl, verdict, model, confidences, gradcamUrl, onDelete
 }) => {
   const [zoomOriginal, setZoomOriginal] = useState(1);
   const [zoomGradcam, setZoomGradcam] = useState(1);
@@ -138,6 +139,15 @@ const ResultModal: React.FC<ResultModalProps> = ({
               </li>
             ))}
           </ul>
+          {onDelete && (
+            <button
+              className={styles.deleteBtn}
+              onClick={onDelete}
+              type="button"
+            >
+              Delete Report
+            </button>
+          )}
         </div>
       </div>
     </div>

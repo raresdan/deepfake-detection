@@ -81,3 +81,7 @@
   width: 18px;
   height: 18px;
 }
+
+.gradCamCheckbox:disabled {
+  cursor: not-allowed;
+}

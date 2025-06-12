@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TopBar from "../../components/TopBar/TopBar";
 import UploadArea from "../../components/UploadArea/UploadArea";
 import ModelSelector from "../../components/ModelSelector/ModelSelector";
@@ -45,9 +45,16 @@ const Dashboard: React.FC = () => {
   } = useSaveDetection();
 
   // UI-only states
-  const [model, setModel] = useState<string>("xception");
+  const [model, setModel] = useState<string>("resnet");
   const [dragActive, setDragActive] = useState(false);
   const [useGradCam, setUseGradCam] = useState(true);
+
+  // Automatically uncheck Grad-CAM if ViT is selected
+  useEffect(() => {
+    if (model === "ViT_multiclass" && useGradCam) {
+      setUseGradCam(false);
+    }
+  }, [model]);
 
   // Unified loading and error state for the action button & overlay
   const loading = detectLoading || saveLoading;
@@ -106,11 +113,14 @@ const Dashboard: React.FC = () => {
               checked={useGradCam}
               onChange={e => setUseGradCam(e.target.checked)}
               className={styles.gradCamCheckbox}
+              disabled={model === "ViT_multiclass"}
             />
             Advance Analysis using Grad-CAM
           </label>
           <div className={styles.gradCamCheckboxDescription}>
-            See how the model takes decisions.
+            {model === "ViT_multiclass"
+              ? "Grad-CAM is not available for Vision Transformer."
+              : "See how the model takes decisions."}
           </div>
         </div>
 

@@ -57,6 +57,26 @@ const History: React.FC = () => {
     checkAuthAndFetch();
   }, [navigate]);
 
+  // --- Extracted delete handler ---
+  const handleDelete = async () => {
+    if (!selected) return;
+    if (!window.confirm("Delete this report?")) return;
+
+    // Get the current session token
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    const headers: HeadersInit = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    await fetch(`/api/history/images/${selected.id}`, {
+      method: "DELETE",
+      headers,
+      credentials: "include",
+    });
+    setGallery((prev) => prev.filter((item) => item.id !== selected.id));
+    setSelected(null);
+  };
+
   return (
     <div className={styles.historyBg}>
       <TopBar />
@@ -82,6 +102,7 @@ const History: React.FC = () => {
         <ResultModal
           open={!!selected}
           onClose={() => setSelected(null)}
+          onDelete={handleDelete}
           imageUrl={selected?.imageUrl || ""}
           gradcamUrl={selected?.gradcamUrl || ""}
           verdict={selected?.verdict || ""}

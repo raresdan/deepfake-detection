@@ -166,6 +166,20 @@
   font-weight: 500;
 }
 
+.deleteBtn {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  padding: 0.6em 1.2em;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.deleteBtn:hover {
+  background: #b71c1c;
+}
+
 /* Larger on desktop */
 @media (min-width: 700px) {
   .zoomWrapper { width: 260px; height: 260px; }

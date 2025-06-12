@@ -7,6 +7,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': "https://deepfake-detection-backend.fly.dev",
+      // Change on Supabase deployment: https://deepfake-detection-kappa.vercel.app/dashboard
+      // '/api': "http://localhost:5000", // Use this for local development
     }
   },
 })
