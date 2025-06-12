@@ -7,6 +7,15 @@ from io import BytesIO
 from PIL import Image
 
 
+def extract_tensor(x):
+    # Recursively extract the first tensor from ModelOutput or tuple
+    if hasattr(x, 'logits'):
+        return extract_tensor(x.logits)
+    if isinstance(x, tuple):
+        return extract_tensor(x[0])
+    return x
+
+
 def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
     gradients = []
     activations = []
@@ -22,8 +31,10 @@ def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
 
     model.eval()
     output = model(input_tensor)
+    output = extract_tensor(output)
     if class_idx is None:
         class_idx = output.argmax(dim=1).item()
+    class_idx = int(class_idx)
 
     loss = output[0, class_idx]
     model.zero_grad()
@@ -57,7 +68,7 @@ def generate_gradcam(model, input_tensor, target_layer, class_idx=None):
 
 
 def run_deepfake_model(
-    img, faces, model=None, class_names=None, return_gradcam=False, gradcam_layer=None
+    img, faces, model=None, class_names=None, return_gradcam=False, gradcam_layer=None, feature_extractor=None
 ):
     if model is None or not faces:
         return "unknown", []
@@ -66,14 +77,24 @@ def run_deepfake_model(
     face_img = img[y1:y2, x1:x2]
     face_resized = cv2.resize(face_img, (224, 224))
     face_rgb = cv2.cvtColor(face_resized, cv2.COLOR_BGR2RGB)
-    face_norm = face_rgb / 255.0
-    face_input = np.transpose(face_norm, (2, 0, 1))[None, ...]
-    face_input = np.ascontiguousarray(face_input, dtype=np.float32)
-    input_tensor = torch.from_numpy(face_input)
-    
+
+    # Use feature_extractor if provided (for ViT)
+    if feature_extractor is not None:
+        # Convert to PIL Image for HuggingFace processors
+        pil_img = Image.fromarray(face_rgb)
+        inputs = feature_extractor(images=pil_img, return_tensors="pt")
+        input_tensor = inputs["pixel_values"]
+    else:
+        face_norm = face_rgb / 255.0
+        face_input = np.transpose(face_norm, (2, 0, 1))[None, ...]
+        face_input = np.ascontiguousarray(face_input, dtype=np.float32)
+        input_tensor = torch.from_numpy(face_input)
+
+    # Always extract tensor from model output
     with torch.no_grad():
-        logits = model(input_tensor)
-        probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
+        output = model(input_tensor)
+        logits = extract_tensor(output)
+        probs = torch.softmax(logits, dim=1).detach().cpu().numpy()[0]
 
     if class_names is None:
         class_names = [f"class_{i}" for i in range(len(probs))]
@@ -89,7 +110,7 @@ def run_deepfake_model(
     # Grad-CAM if requested
     if return_gradcam and gradcam_layer is not None:
         input_tensor.requires_grad = True
-        cam = generate_gradcam(model, input_tensor, gradcam_layer, class_idx=top3_indices[0])
+        cam = generate_gradcam(model, input_tensor, gradcam_layer, class_idx=int(top3_indices[0]))
 
         cam_uint8 = np.uint8(255 * cam)
         cam_color = cv2.applyColorMap(cam_uint8, cv2.COLORMAP_JET)

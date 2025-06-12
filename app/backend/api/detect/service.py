@@ -4,6 +4,8 @@ import base64
 from utils.face import decode_image, detect_faces_local
 from utils.deepfake import run_deepfake_model
 from models_architectures.efficient_net import load_efficientnet_multiclass
+from models_architectures.res_net import load_resnet_multiclass
+from models_architectures.vit import load_vit_multiclass
 from supabase import create_client, Client
 from flask import jsonify, request
 
@@ -12,19 +14,13 @@ MODELS_DIR = os.path.join(os.path.dirname(__file__), '..', 'models')
 MODELS_DIR = os.path.abspath(MODELS_DIR)
 
 AVAILABLE_MODELS = [
-    {
-        "value": "xception",
-        "label": "XceptionNet",
-        "desc": "Slower but more accurate predictions",
-        # "func": load_xception,
-        "target_layer": lambda model: model.block[-1],
-    },
+    # Uncomment or add your CNNs if needed
     {
         "value": "resnet",
         "label": "ResNet",
         "desc": "Fast, good for real-time",
-        # "func": load_resnet,
-        "target_layer": lambda model: model.layer4[-1],
+        "func": load_resnet_multiclass,
+        "target_layer": lambda model: model.backbone.layer4[2].conv3,
     },
     {
         "value": "efficientnet_multiclass",
@@ -32,25 +28,33 @@ AVAILABLE_MODELS = [
         "desc": "Balanced speed and accuracy",
         "func": load_efficientnet_multiclass,
         "target_layer": lambda model: model.backbone.blocks[-1],
-    }
+    },
+    {
+        "value": "ViT_multiclass",
+        "label": "Vision Transformer",
+        "desc": "Less explainability but more accurate predictions",
+        "func": load_vit_multiclass,
+        "target_layer": None,  # ViT does not use Grad-CAM in the same way
+    },
 ]
 
 MODELS = {}
-for model in AVAILABLE_MODELS:
-    model_id = model["value"]
-    if "func" in model:
+for model_info in AVAILABLE_MODELS:
+    model_id = model_info["value"]
+    if "func" in model_info:
         print(f"Loading model: {model_id}")
-        MODELS[model_id] = model["func"]()
+        # ViT returns (model, feature_extractor)
+        MODELS[model_id] = model_info["func"]()
     else:
         print(f"WARNING: Loader function for '{model_id}' not defined")
+        
 
 class_to_label = {
     "class_0": "Real",
     "class_1": "Stable Diffusion XL",
     "class_2": "StyleGAN1",
     "class_3": "StyleGAN2",
-    "class_4": "StyleGAN3",
-    "class_5": "thispersondoesnotexist"
+    "class_4": "thispersondoesnotexist"
 }
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
@@ -71,6 +75,9 @@ def validate_face_service(req):
 def get_gradcam_layer(model_id, model):
     for m in AVAILABLE_MODELS:
         if m["value"] == model_id and "target_layer" in m:
+            # If model is (model, feature_extractor), pass only model to the lambda
+            if isinstance(model, tuple):
+                model = model[0]
             return m["target_layer"](model)
     return None
 
@@ -79,7 +86,7 @@ def detect_service(req):
     if 'image' not in req.files:
         return jsonify({"error": "No image uploaded"}), 400
     file = req.files['image']
-    model_id = req.form.get('model', 'xception')
+    model_id = req.form.get('model', 'resnet')
     file_bytes = file.read()
     if not file_bytes:
         return jsonify({"error": "Empty file"}), 400
@@ -94,9 +101,16 @@ def detect_service(req):
     if not faces:
         return jsonify({"error": "No face detected"}), 200
 
-    model = MODELS.get(model_id)
-    if model is None:
+    model_bundle = MODELS.get(model_id)
+    if model_bundle is None:
         return jsonify({"error": f"Model '{model_id}' not available."}), 400
+
+    # If ViT, model_bundle = (model, feature_extractor)
+    if isinstance(model_bundle, tuple):
+        model, feature_extractor = model_bundle
+    else:
+        model = model_bundle
+        feature_extractor = None
 
     gradcam_requested = req.form.get("gradcam", "false").lower() == "true"
     gradcam_layer = None
@@ -104,14 +118,16 @@ def detect_service(req):
     if gradcam_requested:
         gradcam_layer = get_gradcam_layer(model_id, model)
         verdict, top3, gradcam_b64 = run_deepfake_model(
-            img, faces, model=model, return_gradcam=True, gradcam_layer=gradcam_layer
+            img, faces, model=model, return_gradcam=True, gradcam_layer=gradcam_layer, feature_extractor=feature_extractor
         )
         gradcam_bytes = base64.b64decode(gradcam_b64)
         gradcam_filename = f"gradcam_{uuid.uuid4().hex}.png"
         supabase.storage.from_("gallery").upload(gradcam_filename, gradcam_bytes, {"content-type": "image/png"})
         gradcam_url = supabase.storage.from_("gallery").get_public_url(gradcam_filename)
     else:
-        verdict, top3 = run_deepfake_model(img, faces, model=model)
+        verdict, top3 = run_deepfake_model(
+            img, faces, model=model, feature_extractor=feature_extractor
+        )
 
     translated_top3 = [
         {"label": class_to_label.get(cls, cls), "score": float(score)}

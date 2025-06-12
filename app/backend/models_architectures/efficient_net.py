@@ -4,12 +4,9 @@ import torch.nn as nn
 
 class EfficientNetB1Custom(nn.Module):
   ### Porcile Paper Approach
-  # Freeze Backbone, Adapt to multi-class classification
-    def __init__(self, dropout=0.8):
+    def __init__(self, dropout=0.2):
         super().__init__()
         self.backbone = timm.create_model('efficientnet_b1', pretrained=True)
-        for param in self.backbone.parameters():
-            param.requires_grad = False  # Freeze backbone
         in_features = self.backbone.classifier.in_features
         self.backbone.classifier = nn.Identity()
         self.head = nn.Sequential(
@@ -28,7 +25,7 @@ class EfficientNetB1Custom(nn.Module):
 
 
 def load_efficientnet_multiclass():
-    model = EfficientNetB1Custom(dropout=0.8)
+    model = EfficientNetB1Custom(dropout=0.2)
     model.load_state_dict(torch.load("models/efficientnet_multiclass.pth", map_location="cpu"))
     model.eval()
     return model

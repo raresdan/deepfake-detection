@@ -53,3 +53,10 @@ def get_user_images_service():
             img["gradcamUrl"] = ""
 
     return jsonify({"images": images})
+
+def delete_image_service(image_id):
+    user_id = g.user_id
+    response = supabase.table("Images").delete().eq("id", image_id).eq("user_id", user_id).execute()
+    if getattr(response, "error", None) is not None:
+        return jsonify({"error": "Failed to delete image", "details": str(getattr(response, 'error', response.data))}), 500
+    return jsonify({"success": True})
