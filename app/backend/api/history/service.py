@@ -1,8 +1,6 @@
 from flask import jsonify, g, request
 from extensions import supabase
 
-# Dummy history (to be removed if using DB)
-history = []
 
 def save_detection_service(req):
     data = req.json
@@ -38,7 +36,6 @@ def get_user_images_service():
         return jsonify({"error": "Failed to fetch images", "details": str(getattr(response, 'error', response.data))}), 500
     images = response.data if response.data else []
 
-    # Generate public URLs for each image
     for img in images:
         bucket = img.get("bucket")
         object_path = img.get("object_path")

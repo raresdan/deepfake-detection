@@ -146,16 +146,16 @@
   background: #222031;
   border: none;
   border-radius: 50%;
-  width: 55px; /* Larger button width */
-  height: 55px; /* Larger button height */
+  width: 55px; 
+  height: 55px; 
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   z-index: 10; 
 }
 .zoomBtn:hover, .zoomBtn:focus { background: #6a54fa; }
 .zoomBtn svg {
-  width: 2rem; /* Increase width */
-  height: 2rem; /* Increase height */
+  width: 2rem;
+  height: 2rem;
   display: block;
 }
 .zoomLevel {
@@ -180,13 +180,11 @@
   background: #b71c1c;
 }
 
-/* Larger on desktop */
 @media (min-width: 700px) {
   .zoomWrapper { width: 260px; height: 260px; }
   .dualImageContainer { gap: 3.5rem; }
 }
 
-/* Responsive mobile */
 @media (max-width: 600px) {
   .modal { padding: 1.2rem 0.5rem; min-width: 0; }
   .modalImg, .zoomWrapper {

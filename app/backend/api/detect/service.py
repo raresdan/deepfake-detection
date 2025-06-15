@@ -10,12 +10,11 @@ from models_architectures.custom_net import load_custom_multiclass
 from supabase import create_client, Client
 from flask import jsonify, request
 
-# --- Model Loading (at startup) ---
+
 MODELS_DIR = os.path.join(os.path.dirname(__file__), '..', 'models')
 MODELS_DIR = os.path.abspath(MODELS_DIR)
 
 AVAILABLE_MODELS = [
-    # Uncomment or add your CNNs if needed
     {
         "value": "resnet",
         "label": "ResNet",
@@ -46,6 +45,7 @@ AVAILABLE_MODELS = [
     },
 ]
 
+
 MODELS = {}
 for model_info in AVAILABLE_MODELS:
     model_id = model_info["value"]
@@ -56,7 +56,7 @@ for model_info in AVAILABLE_MODELS:
     else:
         print(f"WARNING: Loader function for '{model_id}' not defined")
         
-
+        
 class_to_label = {
     "class_0": "Real",
     "class_1": "Stable Diffusion XL",
@@ -64,6 +64,7 @@ class_to_label = {
     "class_3": "StyleGAN2",
     "class_4": "thispersondoesnotexist"
 }
+
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
@@ -83,7 +84,7 @@ def validate_face_service(req):
 def get_gradcam_layer(model_id, model):
     for m in AVAILABLE_MODELS:
         if m["value"] == model_id and "target_layer" in m:
-            # If model is (model, feature_extractor), pass only model to the lambda
+            # If model is (model, feature_extractor), pass only the model to the lambda
             if isinstance(model, tuple):
                 model = model[0]
             return m["target_layer"](model)

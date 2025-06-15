@@ -57,12 +57,10 @@ const History: React.FC = () => {
     checkAuthAndFetch();
   }, [navigate]);
 
-  // --- Extracted delete handler ---
   const handleDelete = async () => {
     if (!selected) return;
     if (!window.confirm("Delete this report?")) return;
 
-    // Get the current session token
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     const headers: HeadersInit = {};

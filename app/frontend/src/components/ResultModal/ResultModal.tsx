@@ -10,7 +10,7 @@ interface Confidence {
 interface ResultModalProps {
   open: boolean;
   onClose: () => void;
-  onDelete?: () => void; // <-- add this
+  onDelete?: () => void;
   imageUrl: string;
   verdict: string;
   model: string;
@@ -24,7 +24,6 @@ const ResultModal: React.FC<ResultModalProps> = ({
   const [zoomOriginal, setZoomOriginal] = useState(1);
   const [zoomGradcam, setZoomGradcam] = useState(1);
 
-  // Close with ESC
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); },
     [onClose]
@@ -62,7 +61,7 @@ const ResultModal: React.FC<ResultModalProps> = ({
     </div>
   );
 
-  // Add dynamic classes for zoom
+
   const getZoomClass = (zoom: number) => {
     if (zoom > 1.01) return styles.zoomedIn;
     if (zoom < 0.99) return styles.zoomedOut;

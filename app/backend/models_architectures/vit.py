@@ -2,6 +2,7 @@ import torch
 import os
 from transformers import ViTForImageClassification, ViTFeatureExtractor
 
+
 def load_vit_multiclass():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     model_dir = os.path.join(base_dir, "..", "models", "VisionTransformer", "final_model")

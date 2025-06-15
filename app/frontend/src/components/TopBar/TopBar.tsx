@@ -10,7 +10,7 @@ const TopBar: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Close menu on outside click
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -21,11 +21,11 @@ const TopBar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showMenu]);
 
-  // Handle logout functionality
+
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut(); // Sign out the user
-      navigate("/login"); // Redirect to the login page
+      await supabase.auth.signOut();
+      navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }

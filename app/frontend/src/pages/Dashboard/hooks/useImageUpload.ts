@@ -17,7 +17,6 @@ export function useImageUpload() {
 
     if (file) {
       setImagePreview(URL.createObjectURL(file));
-      // Validate face
       try {
         const formData = new FormData();
         formData.append("image", file);

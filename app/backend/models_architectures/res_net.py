@@ -26,8 +26,6 @@ class ResNetCustom(nn.Module):
 
 def load_resnet_multiclass():
     model = ResNetCustom(dropout=0.2)
-    checkpoint = torch.load("models/resnet_multiclass.pth", map_location="cpu")
-    model.load_state_dict(checkpoint)
-    torch.save(model.state_dict(), "models/resnet_multiclass_cpu.pth")
+    model.load_state_dict(torch.load("models/resnet_multiclass.pth", map_location="cpu"))
     model.eval()
     return model

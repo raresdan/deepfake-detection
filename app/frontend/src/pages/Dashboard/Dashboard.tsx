@@ -6,7 +6,6 @@ import ResultBox from "../../components/ResultBox/ResultBox";
 import Button from "../../components/Button/Button";
 import styles from "./Dashboard.module.css";
 
-// Your custom hooks
 import { useAuthGuard } from "./hooks/useAuthGuard";
 import { useModelOptions } from "./hooks/useModelOptions";
 import { useImageUpload } from "./hooks/useImageUpload";
@@ -44,7 +43,6 @@ const Dashboard: React.FC = () => {
     setError: setSaveError,
   } = useSaveDetection();
 
-  // UI-only states
   const [model, setModel] = useState<string>("resnet");
   const [dragActive, setDragActive] = useState(false);
   const [useGradCam, setUseGradCam] = useState(true);
@@ -56,11 +54,9 @@ const Dashboard: React.FC = () => {
     }
   }, [model]);
 
-  // Unified loading and error state for the action button & overlay
   const loading = detectLoading || saveLoading;
   const error = uploadError || detectError || saveError;
 
-  // Handlers
   const handleDetect = async () => {
     setResult(null);
     setSaveSuccess(false);

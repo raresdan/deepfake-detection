@@ -43,7 +43,6 @@ const ResultBox = ({
           </li>
         ))}
       </ul>
-      {/* Grad-CAM Visualization */}
       {gradCamUrl && (
         <div className={styles.gradCamContainer}>
           <div className={styles.gradCamTitle}>Grad-CAM Visualization</div>

@@ -90,7 +90,6 @@ def run_deepfake_model(
 
     # Use feature_extractor if provided (for ViT)
     if feature_extractor is not None:
-        # Convert to PIL Image for HuggingFace processors
         pil_img = Image.fromarray(face_rgb)
         inputs = feature_extractor(images=pil_img, return_tensors="pt")
         input_tensor = inputs["pixel_values"]
