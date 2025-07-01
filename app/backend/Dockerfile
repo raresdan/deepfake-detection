@@ -23,6 +23,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application files
 COPY . .
 
+RUN git lfs pull
+
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
