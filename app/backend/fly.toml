@@ -18,6 +18,6 @@ primary_region = 'otp'
 
 [[vm]]
   memory = '2gb'
-  cpu_kind = 'shared'
+  cpu_kind = 'performance'
   cpus = 1
   memory_mb = 2048
