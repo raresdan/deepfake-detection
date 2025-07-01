@@ -10,13 +10,6 @@ RUN apt-get update && \
         libxrender1 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    ca-certificates \
-    && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
-    && apt-get install -y git-lfs \
-    && git lfs install
 
 WORKDIR /app
 
@@ -29,7 +22,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application files
 COPY . .
 
-RUN git lfs pull
 
 # Set environment variables
 ENV FLASK_APP=app.py
@@ -39,4 +31,4 @@ ENV FLASK_ENV=production
 EXPOSE 5000
 
 # Command to run the application with gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["sh", "-c", "python utils/download_models.py && gunicorn -b 0.0.0.0:5000 app:app"]
