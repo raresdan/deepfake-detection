@@ -3,7 +3,6 @@ import gdown
 import zipfile
 
 def download_and_extract_models():
-    os.makedirs("models", exist_ok=True)
     zip_path = "models.zip"
     file_id = "1Pb67JoSeFVqVOFEXDWwZzpZZ44nOLakK/view?usp=drive_link"  
 
@@ -20,7 +19,7 @@ def download_and_extract_models():
 
         print("Extracting models.zip...")
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall("models")
+            zip_ref.extractall(".")
 
         print("Cleaning up zip file...")
         os.remove(zip_path)
