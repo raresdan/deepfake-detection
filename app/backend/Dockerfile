@@ -31,4 +31,4 @@ ENV FLASK_ENV=production
 EXPOSE 5000
 
 # Command to run the application with gunicorn
-CMD ["sh", "-c", "python utils/download_models.py && gunicorn -b 0.0.0.0:5000 app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
