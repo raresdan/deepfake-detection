@@ -10,7 +10,13 @@ RUN apt-get update && \
         libxrender1 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    ca-certificates \
+    && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
+    && apt-get install -y git-lfs \
+    && git lfs install
 
 WORKDIR /app
 
