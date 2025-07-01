@@ -3,7 +3,7 @@ from config import Config
 from extensions import cors
 from api.detect import bp as detect_bp
 from api.history import bp as history_bp
-from utils.download_models import download_and_extract_models
+# from utils.download_models import download_and_extract_models
 
 
 def register_blueprints(app):
